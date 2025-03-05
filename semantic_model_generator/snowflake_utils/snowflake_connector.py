@@ -91,7 +91,7 @@ def _get_table_comment(
         try:
             tbl_ddl = (
                 conn.cursor()  # type: ignore[union-attr]
-                .execute(f"select get_ddl('table', '{schema_name}.{table_name}');")
+                .execute(f"select get_ddl('table', '\"{schema_name}\".\"{table_name}\"');")
                 .fetchall()[0][0]
                 .replace("'", "\\'")
             )
@@ -197,7 +197,7 @@ def _get_column_representation(
             cursor = conn.cursor(DictCursor)
             assert cursor is not None, "Cursor is unexpectedly None"
             cursor_execute = cursor.execute(
-                f'select distinct "{column_name}" from {schema_name}.{table_name} limit {ndv}'
+                f'select distinct "{column_name}" from \"{schema_name}\".\"{table_name}\" limit {ndv}'
             )
             assert cursor_execute is not None, "cursor_execute should not be none "
             res = cursor_execute.fetchall()
@@ -246,8 +246,8 @@ def _fetch_valid_tables_and_views(
             )
         )
 
-    tables = _get_df(f"show tables in database {db_name}")
-    views = _get_df(f"show views in database {db_name}")
+    tables = _get_df(f"show tables in database \"{db_name}\"")
+    views = _get_df(f"show views in database \"{db_name}\"")
     return pd.concat([tables, views], axis=0)
 
 
@@ -293,11 +293,11 @@ def fetch_schemas_in_database(conn: SnowflakeConnection, db_name: str) -> List[s
     Returns: a list of qualified schema names (db.schema)
 
     """
-    query = f"show schemas in database {db_name};"
+    query = f"show schemas in database \"{db_name}\";"
     cursor = conn.cursor()
     cursor.execute(query)
     results = cursor.fetchall()
-    return [f"{result[4]}.{result[1]}" for result in results]
+    return [f"\"{result[4]}\".\"{result[1]}\"" for result in results]
 
 
 def fetch_tables_views_in_schema(
@@ -316,14 +316,14 @@ def fetch_tables_views_in_schema(
     cursor.execute(query)
     tables = cursor.fetchall()
     # Each row in the result has columns (created_on, table_name, database_name, schema_name, ...)
-    results = [f"{result[2]}.{result[3]}.{result[1]}" for result in tables]
+    results = [f"\"{result[2]}\".\"{result[3]}\".\"{result[1]}\"" for result in tables]
 
     query = f"show views in schema {schema_name};"
     cursor = conn.cursor()
     cursor.execute(query)
     views = cursor.fetchall()
     # Each row in the result has columns (created_on, view_name, reserved, database_name, schema_name, ...)
-    results += [f"{result[3]}.{result[4]}.{result[1]}" for result in views]
+    results += [f"\"{result[3]}\".\"{result[4]}\".\"{result[1]}\"" for result in views]
 
     return results
 
@@ -338,12 +338,12 @@ def fetch_stages_in_schema(conn: SnowflakeConnection, schema_name: str) -> list[
     Returns: a list of fully qualified stage names
     """
 
-    query = f"show stages in schema {schema_name};"
+    query = f"show stages in schema \"{schema_name}\";"
     cursor = conn.cursor()
     cursor.execute(query)
     stages = cursor.fetchall()
 
-    return [f"{result[2]}.{result[3]}.{result[1]}" for result in stages]
+    return [f"\"{result[2]}\".\"{result[3]}\".\"{result[1]}\"" for result in stages]
 
 
 def fetch_table_schema(conn: SnowflakeConnection, table_fqn: str) -> dict[str, str]:
@@ -443,8 +443,8 @@ def get_valid_schemas_tables_columns_df(
             table_names_str = ", ".join([f"'{t.lower()}'" for t in table_names])
             where_clause += f"AND LOWER(t.table_name) in ({table_names_str}) "
     query = f"""select t.{_TABLE_SCHEMA_COL}, t.{_TABLE_NAME_COL}, c.{_COLUMN_NAME_COL}, c.{_DATATYPE_COL}, c.{_COMMENT_COL} as {_COLUMN_COMMENT_ALIAS}
-from {db_name}.information_schema.tables as t
-join {db_name}.information_schema.columns as c on t.table_schema = c.table_schema and t.table_name = c.table_name{where_clause}
+from \"{db_name}\".information_schema.tables as t
+join \"{db_name}\".information_schema.columns as c on t.table_schema = c.table_schema and t.table_name = c.table_name{where_clause}
 order by 1, 2, c.ordinal_position"""
     cursor_execute = conn.cursor().execute(query)
     assert cursor_execute, "cursor_execute should not be None here"

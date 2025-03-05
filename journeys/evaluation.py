@@ -484,7 +484,7 @@ def evaluation_data_dialog() -> None:
         )
         if original_new_table_name:
             schema_name = st.session_state.get("selected_results_eval_schema")
-            updated_new_table_name = f"{schema_name}.{original_new_table_name}".upper()
+            updated_new_table_name = f"\"{schema_name}\".\"{original_new_table_name}\"".upper()
             st.session_state["selected_results_eval_new_table"] = updated_new_table_name
     else:
         table_selector_container(

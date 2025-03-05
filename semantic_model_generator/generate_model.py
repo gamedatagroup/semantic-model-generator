@@ -195,7 +195,7 @@ def raw_schema_to_semantic_context(
         # Verify this is a valid FQN table. For now, we check that the table follows the following format.
         # {database}.{schema}.{table}
         fqn_table = create_fqn_table(table)
-        fqn_databse_schema = f"{fqn_table.database}.{fqn_table.schema_name}"
+        fqn_databse_schema = f"\"{fqn_table.database}\".\"{fqn_table.schema_name}\""
 
         if fqn_databse_schema not in unique_database_schema:
             unique_database_schema.append(fqn_databse_schema)

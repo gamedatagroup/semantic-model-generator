@@ -53,11 +53,15 @@ def update_tables() -> None:
     # Fetch the available tables for the selected schemas
     tables = []
     for schema in schemas:
+        # schema = f"\"{schema}\""
         try:
             tables.extend(get_available_tables(schema))
-        except ProgrammingError:
+        except ProgrammingError as e:
             logger.info(
                 f"Insufficient permissions to read from schema {schema}, skipping"
+            )
+            logger.info(
+                f"e.msg: {e.msg}"
             )
     st.session_state["available_tables"] = tables
 
