@@ -440,7 +440,7 @@ def send_analyst_requests() -> None:
     st.session_state["analyst_results_frame"] = analyst_results_frame
 
 
-@st.experimental_dialog("Evaluation Tables", width="large")
+@st.dialog("Evaluation Tables", width="large")
 def evaluation_data_dialog() -> None:
     st.markdown("Please select an evaluation table.")
     st.markdown("The evaluation table should have the following schema:")
