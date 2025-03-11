@@ -246,8 +246,8 @@ def _fetch_valid_tables_and_views(
             )
         )
 
-    tables = _get_df(f"show tables in database \"{db_name}\"")
-    views = _get_df(f"show views in database \"{db_name}\"")
+    tables = _get_df(f"show tables in database {db_name}")
+    views = _get_df(f"show views in database {db_name}")
     return pd.concat([tables, views], axis=0)
 
 
@@ -424,7 +424,15 @@ def create_table_in_schema(
     except ProgrammingError as e:
         logger.error(f"Error creating table: {e}")
         return False
-
+    
+def removeFQNQuotesForStringComp(fqn_part: str) -> str:
+    end_idx = len(fqn_part)-1
+    if fqn_part[0] == '"':
+        fqn_part = fqn_part[1:end_idx]
+    end_idx = len(fqn_part)-1
+    if fqn_part[end_idx] == '"':
+        fqn_part = fqn_part[0,end_idx]
+    return fqn_part
 
 def get_valid_schemas_tables_columns_df(
     conn: SnowflakeConnection,
@@ -438,20 +446,20 @@ def get_valid_schemas_tables_columns_df(
         )
     where_clause = ""
     if table_schema:
-        where_clause += f" where t.table_schema ilike '{table_schema}' "
+        where_clause += f" where t.table_schema ilike '{removeFQNQuotesForStringComp(table_schema.lower())}' "
         if table_names:
-            table_names_str = ", ".join([f"'{t.lower()}'" for t in table_names])
-            where_clause += f"AND LOWER(t.table_name) in ({table_names_str}) "
-    query = f"""select t.{_TABLE_SCHEMA_COL}, t.{_TABLE_NAME_COL}, c.{_COLUMN_NAME_COL}, c.{_DATATYPE_COL}, c.{_COMMENT_COL} as {_COLUMN_COMMENT_ALIAS}
-from \"{db_name}\".information_schema.tables as t
-join \"{db_name}\".information_schema.columns as c on t.table_schema = c.table_schema and t.table_name = c.table_name{where_clause}
+            table_names_str = ", ".join([f"'{removeFQNQuotesForStringComp(t.lower())}'" for t in table_names])
+            where_clause += f"AND LOWER(t.table_name) in ({removeFQNQuotesForStringComp(table_names_str.lower())}) "
+    query = f"""select t.\"{_TABLE_SCHEMA_COL}\", t.\"{_TABLE_NAME_COL}\", c.{_COLUMN_NAME_COL}, c.{_DATATYPE_COL}, c.{_COMMENT_COL} as {_COLUMN_COMMENT_ALIAS}
+from \"{removeFQNQuotesForStringComp(db_name.lower())}\".information_schema.tables as t
+join \"{removeFQNQuotesForStringComp(db_name.lower())}\".information_schema.columns as c on t.table_schema = c.table_schema and t.table_name = c.table_name{where_clause}
 order by 1, 2, c.ordinal_position"""
     cursor_execute = conn.cursor().execute(query)
     assert cursor_execute, "cursor_execute should not be None here"
     schemas_tables_columns_df = cursor_execute.fetch_pandas_all()
 
     valid_tables_and_views_df = _fetch_valid_tables_and_views(
-        conn=conn, db_name=db_name
+        conn=conn, db_name=db_name.lower()
     )
 
     valid_schemas_tables_columns_df = valid_tables_and_views_df.merge(

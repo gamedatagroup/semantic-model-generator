@@ -5,16 +5,27 @@ from snowflake.connector.connection import SnowflakeConnection
 
 from semantic_model_generator.data_processing.data_types import FQNParts
 
+def confirmFQNQuoting(fqn_part: str) -> str:
+    if fqn_part[0] != '"':
+        fqn_part = '"' + fqn_part
+    end_idx = len(fqn_part)-1
+    if fqn_part[end_idx] != '"':
+        fqn_part = fqn_part + '"'
+    return fqn_part
 
 def create_fqn_table(fqn_str: str) -> FQNParts:
-    if fqn_str.count(".") != 2:
+    # '.' characters in the table name throw off this check
+    if fqn_str.count('"."') != 2:
         raise ValueError(
             "Expected to have a table fully qualified name following the {database}.{schema}.{table} format."
             + f"Instead found {fqn_str}"
         )
-    database, schema, table = fqn_str.split(".")
+    database, schema, table = fqn_str.split('"."')
+    database = confirmFQNQuoting(database)
+    schema = confirmFQNQuoting(schema)
+    table = confirmFQNQuoting(table)
     return FQNParts(
-        database=database.upper(), schema_name=schema.upper(), table=table.upper()
+        database=database, schema_name=schema, table=table
     )
 
 

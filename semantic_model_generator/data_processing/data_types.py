@@ -9,9 +9,9 @@ class FQNParts:
     schema_name: str
     table: str
 
-    def __post_init__(self: Any) -> None:
-        """Uppercase table name"""
-        self.table = self.table.upper()
+    # def __post_init__(self: Any) -> None:
+    #     """Uppercase table name"""
+    #     self.table = self.table.upper()
 
 
 @dataclass

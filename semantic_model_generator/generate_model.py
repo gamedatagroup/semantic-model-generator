@@ -195,7 +195,7 @@ def raw_schema_to_semantic_context(
         # Verify this is a valid FQN table. For now, we check that the table follows the following format.
         # {database}.{schema}.{table}
         fqn_table = create_fqn_table(table)
-        fqn_databse_schema = f"\"{fqn_table.database}\".\"{fqn_table.schema_name}\""
+        fqn_databse_schema = f"{fqn_table.database}.{fqn_table.schema_name}"
 
         if fqn_databse_schema not in unique_database_schema:
             unique_database_schema.append(fqn_databse_schema)
@@ -203,15 +203,18 @@ def raw_schema_to_semantic_context(
         logger.info(f"Pulling column information from {fqn_table}")
         valid_schemas_tables_columns_df = get_valid_schemas_tables_columns_df(
             conn=conn,
-            db_name=fqn_table.database,
-            table_schema=fqn_table.schema_name,
-            table_names=[fqn_table.table],
+            db_name=fqn_table.database.lower(),
+            table_schema=fqn_table.schema_name.lower(),
+            table_names=[fqn_table.table.lower()],
         )
-        assert not valid_schemas_tables_columns_df.empty
 
+        assert not valid_schemas_tables_columns_df.empty
+        
+        table_to_compare = str(valid_schemas_tables_columns_df["TABLE_NAME"])
         # get the valid columns for this table.
         valid_columns_df_this_table = valid_schemas_tables_columns_df[
-            valid_schemas_tables_columns_df["TABLE_NAME"] == fqn_table.table
+             table_to_compare.lower() == fqn_table.table.lower()
+            ## Need a better solution than above, just assumes everything needs to be .lower().
         ]
 
         raw_table = get_table_representation(
