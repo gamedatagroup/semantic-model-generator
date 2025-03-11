@@ -210,10 +210,9 @@ def raw_schema_to_semantic_context(
 
         assert not valid_schemas_tables_columns_df.empty
         
-        table_to_compare = str(valid_schemas_tables_columns_df["TABLE_NAME"])
         # get the valid columns for this table.
         valid_columns_df_this_table = valid_schemas_tables_columns_df[
-             table_to_compare.lower() == fqn_table.table.lower()
+            valid_schemas_tables_columns_df["TABLE_NAME"] == fqn_table.table.replace('\"', '')
             ## Need a better solution than above, just assumes everything needs to be .lower().
         ]
 
