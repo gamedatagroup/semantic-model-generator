@@ -197,7 +197,7 @@ def _get_column_representation(
             cursor = conn.cursor(DictCursor)
             assert cursor is not None, "Cursor is unexpectedly None"
             cursor_execute = cursor.execute(
-                f'select distinct "{column_name}" from \"{schema_name}\".\"{table_name}\" limit {ndv}'
+                f'select distinct "{column_name}" from {schema_name}.{table_name} limit {ndv}'
             )
             assert cursor_execute is not None, "cursor_execute should not be none "
             res = cursor_execute.fetchall()
