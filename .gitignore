@@ -38,3 +38,5 @@ semantic_model_generator/output_models/*.yaml
 
 # test coverage
 .coverage
+.venv
+venv
