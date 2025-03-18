@@ -199,7 +199,6 @@ CALL KAI_UTILS.SEMANTIC_MODEL_GENERATOR.ZIP_SRC_FILES(
 
 -- Create generation callable
 CREATE OR REPLACE PROCEDURE KAI_UTILS.SEMANTIC_MODEL_GENERATOR.GENERATE_SEMANTIC_FILE(
-    STAGE_NAME STRING,
     MODEL_NAME STRING,
     SAMPLE_VALUE INT,
     ALLOW_JOINS BOOLEAN,
@@ -263,7 +262,6 @@ def import_src_zip(zip_name = 'semantic_model_generator.zip'):
     sys.path.insert(0,extracted)
 
 def run_generation(session: Session,
-                   STAGE_NAME: str,
                    MODEL_NAME: str,
                    SAMPLE_VALUE: int,
                    ALLOW_JOINS: bool,
