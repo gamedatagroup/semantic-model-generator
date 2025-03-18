@@ -197,9 +197,6 @@ CALL KAI_UTILS.SEMANTIC_MODEL_GENERATOR.ZIP_SRC_FILES(
     'semantic_model_generator'
 );
 
--- TODO, make a version of this that just returns the yaml string instead of uploading it...
--- actually just edit this one
-
 -- Create generation callable
 CREATE OR REPLACE PROCEDURE KAI_UTILS.SEMANTIC_MODEL_GENERATOR.GENERATE_SEMANTIC_FILE(
     STAGE_NAME STRING,
