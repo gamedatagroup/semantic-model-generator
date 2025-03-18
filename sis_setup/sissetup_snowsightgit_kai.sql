@@ -197,6 +197,9 @@ CALL KAI_UTILS.SEMANTIC_MODEL_GENERATOR.ZIP_SRC_FILES(
     'semantic_model_generator'
 );
 
+-- TODO, make a version of this that just returns the yaml string instead of uploading it...
+-- actually just edit this one
+
 -- Create generation callable
 CREATE OR REPLACE PROCEDURE KAI_UTILS.SEMANTIC_MODEL_GENERATOR.GENERATE_SEMANTIC_FILE(
     STAGE_NAME STRING,
@@ -287,11 +290,11 @@ def run_generation(session: Session,
             allow_joins=ALLOW_JOINS,
         )
 
-        session.file.put_stream(
-                io.BytesIO(yaml_str.encode('utf-8')),
-               f"@{STAGE_NAME}/{MODEL_NAME}.yaml",
-               auto_compress=False,
-               overwrite=True,
-           )
-        return f"Semantic model file {MODEL_NAME}.yaml has been generated and saved to {STAGE_NAME}."
+        #session.file.put_stream(
+        #        io.BytesIO(yaml_str.encode('utf-8')),
+        #       f"@{STAGE_NAME}/{MODEL_NAME}.yaml",
+        #       auto_compress=False,
+        #       overwrite=True,
+        #   )
+        return yaml_str
 $$;
